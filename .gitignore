@@ -1,0 +1,24 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with 'go test -c'
+*.test
+
+# Output of the go coverage tool, compiled when using 'go test -v'
+*.out
+
+# Dependency directories (optional; default is to use modules)
+vendor/
+
+# Environment variables file
+.env
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo

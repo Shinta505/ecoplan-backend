@@ -1,0 +1,394 @@
+@baseUrl = http://localhost:8080/api/v1
+
+### ==========================================
+### 1. AUTHENTICATION
+### ==========================================
+
+### Register User Baru (Role: User)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Nama Lengkap User",
+  "email": "user@ecoplan.com",
+  "password": "passworduser",
+  "role": "user"
+}
+
+### Register Seller Baru (Role: Seller)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Merchant Hijau Tegal",
+  "email": "seller@ecoplan.com",
+  "password": "passwordseller",
+  "role": "seller"
+}
+
+### Login User / Seller (Menghasilkan JWT Token)
+# @name loginUser
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@ecoplan.com",
+  "password": "passworduser"
+}
+
+### Login Admin
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@ecoplan.com",
+  "password": "passwordadmin"
+}
+
+### Variabel Global Token (Ganti token sesuai hasil response login)
+@authToken = {{loginUser.response.body.data.token}}
+@adminToken = {{loginAdmin.response.body.data.token}}
+
+
+### ==========================================
+### 2. WASTE DETECTION (MACHINE LEARNING)
+### ==========================================
+
+### Deteksi Sampah via Citra Gambar (Guest / Authenticated)
+POST {{baseUrl}}/detections
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image"; filename="sampah_baterai.jfif"
+Content-Type: image/jpeg
+
+< ./sampah_baterai.jfif
+--boundary--
+
+### Ambil Riwayat Deteksi Pengguna
+GET {{baseUrl}}/detections/history
+Authorization: Bearer {{authToken}}
+
+### Ambil Rincian Deteksi Berdasarkan ID
+GET {{baseUrl}}/detections/00000000-0000-0000-0000-000000000000
+
+
+### ==========================================
+### 3. WASTE GUIDES & GEMINI AI
+### ==========================================
+
+### Ambil Seluruh Panduan 10 Kategori Sampah
+GET {{baseUrl}}/guides
+
+### Ambil Panduan Berdasarkan Kategori Spesifik (Contoh: plastic)
+GET {{baseUrl}}/guides/plastic
+
+### Memicu Gemini AI untuk Saran Daur Ulang Kustom
+POST {{baseUrl}}/guides/ai-suggestion
+Content-Type: application/json
+
+{
+  "category": "plastic",
+  "prompt": "Bagaimana cara membuat pot tanaman gantung yang estetis dari botol plastik bekas ini?"
+}
+
+
+### ==========================================
+### 4. ARTICLES (EDUCATION & PUBLICATION)
+### ==========================================
+
+### Ambil Daftar Artikel Terpublikasi (Publik)
+GET {{baseUrl}}/articles?search=kompos&page=1&limit=10
+
+### Kirim Draf Artikel Baru Lengkap dengan Skor Turnitin (User)
+POST {{baseUrl}}/articles
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Strategi Pengolahan Sampah Plastik Skema Ekonomi Sirkular",
+  "content": "Pengolahan sampah plastik memerlukan keterlibatan aktif masyarakat melalui bank sampah dan pemilahan dari rumah...",
+  "turnitin_score": 12.5
+}
+
+### Ambil Daftar Artikel Milik Saya
+GET {{baseUrl}}/articles/my-articles
+Authorization: Bearer {{authToken}}
+
+### Baca Detail Artikel & Catat Views (Publik)
+GET {{baseUrl}}/articles/00000000-0000-0000-0000-000000000000
+
+### Pembaruan Draf Artikel oleh Penulis
+PUT {{baseUrl}}/articles/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "Revisi: Strategi Pengolahan Sampah Plastik Skema Ekonomi Sirkular",
+  "content": "Konten artikel yang telah diperbarui dan disempurnakan..."
+}
+
+### Review dan Moderasi Artikel oleh Admin (Status: published / rejected)
+PATCH {{baseUrl}}/articles/00000000-0000-0000-0000-000000000000/review
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "published",
+  "turnitin_score": 12.5
+}
+
+### Hapus Artikel (Penulis / Admin)
+DELETE {{baseUrl}}/articles/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{authToken}}
+
+
+### ==========================================
+### 5. MARKETPLACE, STORES & PRODUCTS
+### ==========================================
+
+### Pendaftaran Toko Baru (Mengaktifkan Role Seller)
+POST {{baseUrl}}/stores
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "store_name": "Toko Daur Ulang Mandiri Tegal",
+  "store_description": "Pusat kerajinan tangan daur ulang sampah dan kompos organik berkualitas.",
+  "address": "Jl. Martadiredja No. 45, Tegal, Jawa Tengah"
+}
+
+### Ambil Rincian Profil Toko Saya
+GET {{baseUrl}}/stores/my-store
+Authorization: Bearer {{authToken}}
+
+### Perbarui Informasi Profil Toko
+PUT {{baseUrl}}/stores
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "store_name": "Toko Daur Ulang Mandiri Sejahtera",
+  "store_description": "Pusat kompos organik dan kerajinan tangan ramah lingkungan.",
+  "address": "Sleman, Yogyakarta"
+}
+
+### Tambah Produk Daur Ulang Baru ke Katalog Toko (Seller)
+POST {{baseUrl}}/marketplace/products
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Pupuk Kompos Organik Premium 5kg",
+  "description": "Kompos murni hasil pengolahan sampah biologis dapur dan dedaunan.",
+  "price": 25000,
+  "stock": 100,
+  "category": "biological"
+}
+
+### Ambil Seluruh Daftar Produk Marketplace (Publik)
+GET {{baseUrl}}/marketplace/products?category=biological&search=kompos&page=1&limit=10
+
+### Ambil Rincian Detail Produk Berdasarkan ID
+GET {{baseUrl}}/marketplace/products/00000000-0000-0000-0000-000000000000
+
+### Ambil Daftar Produk Toko Saya
+GET {{baseUrl}}/stores/my-products
+Authorization: Bearer {{authToken}}
+
+### Perbarui Informasi Produk Marketplace (Seller)
+PUT {{baseUrl}}/marketplace/products/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Pupuk Kompos Organik Super 5kg",
+  "description": "Kompos murni kaya nutrisi untuk tanaman hias.",
+  "price": 28000,
+  "stock": 85,
+  "category": "biological"
+}
+
+### Hapus Produk dari Marketplace (Seller / Admin)
+DELETE {{baseUrl}}/marketplace/products/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{authToken}}
+
+
+### ==========================================
+### 6. ESCROW TRANSACTIONS & PAYMENT
+### ==========================================
+
+### Buat Transaksi Checkout & Menghasilkan Snap Token Midtrans
+POST {{baseUrl}}/transactions
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "product_id": "00000000-0000-0000-0000-000000000000",
+      "quantity": 2
+    }
+  ],
+  "shipping_cost": 15000.00
+}
+
+### Ambil Daftar Riwayat Transaksi (User / Admin)
+GET {{baseUrl}}/transactions?status=paid_escrow&page=1&limit=10
+Authorization: Bearer {{authToken}}
+
+### Ambil Rincian Detail Transaksi Berdasarkan ID
+GET {{baseUrl}}/transactions/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{authToken}}
+
+### Perbarui Alur Status Transaksi Escrow (Contoh: Konfirmasi Selesai / Completed)
+PATCH {{baseUrl}}/transactions/00000000-0000-0000-0000-000000000000/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status": "completed"
+}
+
+### Webhook Callback Otomatis dari Server Midtrans (Public)
+POST {{baseUrl}}/transactions/webhook
+Content-Type: application/json
+
+{
+  "order_id": "ECO-1741870000-12345678",
+  "transaction_status": "settlement",
+  "fraud_status": "accept",
+  "gross_amount": "55000.00"
+}
+
+### Periksa Status Pembayaran Terkini ke Core API Midtrans
+GET {{baseUrl}}/payment/status/ECO-1741870000-12345678
+Authorization: Bearer {{authToken}}
+
+### Penarikan Saldo Toko Seller (Withdrawal)
+POST {{baseUrl}}/payment/withdraw
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "amount": 50000.00,
+  "bank_name": "BCA",
+  "account_number": "1234567890",
+  "account_name": "Shinta Nursobah Chairani"
+}
+
+
+### ==========================================
+### 7. LOGISTICS & SHIPPING (RAJAONGKIR)
+### ==========================================
+
+### Cari Wilayah Pengiriman Domestik (Autocomplete / Search)
+GET {{baseUrl}}/logistics/destinations?search=Sleman&limit=10&offset=0
+
+### Hitung Estimasi Ongkos Kirim Domestik (General)
+POST {{baseUrl}}/logistics/shipping-cost
+Content-Type: application/json
+
+{
+  "origin": 31555,
+  "destination": 68423,
+  "weight": 1000,
+  "courier": "jne",
+  "price": "lowest"
+}
+
+### Lacak Resi Pengiriman Real-Time (General)
+GET {{baseUrl}}/logistics/tracking?resi=JP123456789&courier=jne
+
+### Hitung Estimasi Ongkos Kirim Checkout Pesanan
+POST {{baseUrl}}/shipping/calculate
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "origin": 31555,
+  "destination": 68423,
+  "weight": 1000,
+  "courier": "jne",
+  "price": "lowest"
+}
+
+### Input / Perbarui Nomor Resi Transaksi oleh Penjual (Seller / Admin)
+PATCH {{baseUrl}}/shipping/receipt/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "receipt_number": "JP123456789"
+}
+
+### Lacak Pengiriman Berdasarkan ID Transaksi
+GET {{baseUrl}}/shipping/tracking/00000000-0000-0000-0000-000000000000?courier=jne
+Authorization: Bearer {{authToken}}
+
+
+### ==========================================
+### 8. USER PROFILE & GAMIFICATION REWARDS
+### ==========================================
+
+### Ambil Informasi Data Diri, Saldo, dan Statistik Profil
+GET {{baseUrl}}/profile
+Authorization: Bearer {{authToken}}
+
+### Perbarui Data Profil Pengguna (Nama & Email)
+PUT {{baseUrl}}/profile
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Shinta Nursobah Chairani",
+  "email": "shinta.chairani@ecoplan.com"
+}
+
+### Ambil Riwayat Transaksi & Saldo Pengguna
+GET {{baseUrl}}/profile/transactions
+Authorization: Bearer {{authToken}}
+
+### Ambil Riwayat Pemindaian Deteksi Sampah Pengguna
+GET {{baseUrl}}/profile/detections
+Authorization: Bearer {{authToken}}
+
+
+### ==========================================
+### 9. ADMIN YOUTUBE VIDEO MANAGEMENT
+### ==========================================
+
+### Ambil Daftar Video Edukasi YouTube (Publik / Filter Kategori)
+GET {{baseUrl}}/videos?category=biological&search=kompos&page=1&limit=10
+
+### Ambil Detail Video Berdasarkan ID
+GET {{baseUrl}}/videos/00000000-0000-0000-0000-000000000000
+
+### Tambah Tautan Video YouTube Baru (Khusus Admin)
+POST {{baseUrl}}/videos
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Tutorial Praktis Pembuatan Kompos Organik Skala Rumah Tangga",
+  "youtube_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  "description": "Panduan langkah demi langkah mengubah sampah sisa makanan dapur menjadi pupuk kompos berkualitas tinggi.",
+  "category": "biological"
+}
+
+### Perbarui Data Video Edukasi (Khusus Admin)
+PUT {{baseUrl}}/videos/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Revisi: Tutorial Praktis Pembuatan Kompos Organik Skala Rumah Tangga",
+  "youtube_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  "description": "Deskripsi yang telah diperbarui.",
+  "category": "biological"
+}
+
+### Hapus Data Video Edukasi (Khusus Admin)
+DELETE {{baseUrl}}/videos/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{adminToken}}
