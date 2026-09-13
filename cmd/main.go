@@ -42,14 +42,16 @@ func main() {
 	// 6. Menginisialisasi dan mendaftarkan seluruh rute API melalui package routes
 	r := routes.SetupRouter()
 
-	// 7. Menjalankan HTTP Server pada port yang dikonfigurasi (Default: 8080)
+	// 7. Menjalankan HTTP Server pada port yang dikonfigurasi
+	// Cloud Run akan menyuntikkan env var PORT secara otomatis.
 	port := cfg.AppPort
 	if port == "" {
 		port = "8080"
 	}
 
-	serverAddr := ":" + port
-	log.Printf("[INFO] Server HTTP Backend EcoPlan berjalan dan mendengarkan pada port %s...", port)
+	// Mengikat secara eksplisit ke 0.0.0.0 agar container dapat menerima traffic dari luar (Cloud Run proxy)
+	serverAddr := "0.0.0.0:" + port
+	log.Printf("[INFO] Server HTTP Backend EcoPlan berjalan dan mendengarkan pada antarmuka %s...", serverAddr)
 
 	if err := r.Run(serverAddr); err != nil {
 		log.Fatalf("[ERROR] Gagal menjalankan HTTP Server: %v", err)

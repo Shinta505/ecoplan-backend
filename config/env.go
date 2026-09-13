@@ -18,7 +18,7 @@ type Config struct {
 	DBName     string
 	DBPort     string
 	DBSslMode  string
-	GinMode    string // Menambahkan properti GinMode untuk konfigurasi mode Gin Framework
+	GinMode    string
 
 	// Authentication Configuration
 	JWTSecret string
@@ -55,9 +55,9 @@ func LoadEnv() *Config {
 		DBName:               getEnv("DB_NAME", "ecoplan_db"),
 		DBPort:               getEnv("DB_PORT", "5432"),
 		DBSslMode:            getEnv("DB_SSLMODE", "disable"),
-		GinMode:              getEnv("GIN_MODE", "debug"), // Membaca GIN_MODE dengan fallback ke "debug"
+		GinMode:              getEnv("GIN_MODE", "debug"),
 		JWTSecret:            getEnv("JWT_SECRET", "ecoplan_jwt_secret_key"),
-		AIServiceURL:         getEnv("AI_SERVICE_URL", "https://ecoplan-ai-service-production.up.railway.app"),
+		AIServiceURL:         getEnv("AI_SERVICE_URL", "http://localhost:8000"),
 		APIKeyGemini:         getEnv("API_KEY_GEMINI", ""),
 		MidtransID:           getEnv("MIDTRANS_ID", ""),
 		MidtransServerKey:    getEnv("MIDTRANS_SERVER_KEY", ""),

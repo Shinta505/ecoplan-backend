@@ -1,0 +1,26 @@
+# Version Control
+.git
+.gitignore
+
+# Environment Variables & Configuration
+.env
+
+# Direktori Penyimpanan Berkas Lokal (Hasil unggahan pengguna tidak boleh masuk ke dalam image)
+uploads/
+
+# Berkas Pengujian API dan Aset Lokal
+api.http
+sampah_baterai.jfif
+
+# Dokumentasi
+README.md
+LICENSE
+
+# Berkas Pengujian Go (Unit Test)
+# Mengecualikan berkas seperti auth_middleware_test.go untuk memperkecil ukuran image produksi
+**/*_test.go
+
+# Berkas sementara dan cache Go
+tmp/
+*.out
+*.test
