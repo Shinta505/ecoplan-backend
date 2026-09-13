@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentasi API EcoPlan - Sistem Cerdas Pengelolaan Sampah</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    },
+                    colors: {
+                        eco: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            900: '#14532d'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Highlight.js for Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        pre {
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            background-color: #1e293b !important;
+        }
+        
+        code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+        }
+        
+        .endpoint-card {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .endpoint-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 antialiased flex h-screen overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-72 bg-white border-r border-gray-200 flex flex-col h-full shadow-sm z-10">
+        <div class="p-6 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-eco-700 flex items-center gap-2">
+                <i data-lucide="leaf" class="text-eco-500"></i> EcoPlan API
+            </h1>
+            <p class="text-sm text-gray-500 mt-1">v1.0.0 • Dokumentasi Sistem</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto sidebar-scroll p-4 space-y-1">
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Pengantar</p>
+            <a href="#overview" class="block px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-eco-50 hover:text-eco-700">Arsitektur Sistem</a>
+            <a href="#authentication" class="block px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-eco-50 hover:text-eco-700">Otentikasi & Keamanan</a>
+
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-6 mb-2">Core Services</p>
+            <a href="#auth-endpoints" class="block px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-eco-50 hover:text-eco-700">1. Manajemen Akun (Auth)</a>
+            <a href="#ai-endpoints" class="block px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-eco-50 hover:text-eco-700">2. Deteksi Sampah AI</a>
+            <a href="#gemini-endpoints" class="block px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-eco-50 hover:text-eco-700">3. Edukasi & Gemini AI</a>
+            <a href="#article-endpoints" class="block px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-eco-50 hover:text-eco-700">4. Artikel & Publikasi</a>
+
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-6 mb-2">Marketplace & Toko</p>
+            <a href="#store-endpoints" class="block px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-eco-50 hover:text-eco-700">5. Marketplace, Toko & Produk</a>
+
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-6 mb-2">Transaksi & Logistik</p>
+            <a href="#transaction-endpoints" class="block px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-eco-50 hover:text-eco-700">6. Transaksi Escrow & Midtrans</a>
+            <a href="#logistics-endpoints" class="block px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-eco-50 hover:text-eco-700">7. Logistik & RajaOngkir</a>
+            <a href="#profile-endpoints" class="block px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-eco-50 hover:text-eco-700">8. Profil & Gamifikasi</a>
+            <a href="#video-endpoints" class="block px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-eco-50 hover:text-eco-700">9. Video Edukasi YouTube</a>
+        </nav>
+        <div class="p-4 border-t border-gray-200 bg-gray-50">
+            <p class="text-xs text-gray-500 text-center">Skripsi S1 Informatika - UPN "Veteran" Yogyakarta</p>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto bg-gray-50 p-8 lg:p-12 scroll-smooth">
+        <div class="max-w-5xl mx-auto space-y-16">
+
+            <!-- Section: Overview -->
+            <section id="overview" class="scroll-mt-10">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Arsitektur Sistem & Pengantar</h2>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        Dokumentasi API platform <strong>EcoPlan</strong> ini mencakup spesifikasi lengkap basis endpoint, format payload Request JSON, hingga struktur Response API untuk mendukung implementasi sistem secara penuh[cite: 5]. Base URL API
+                        backend: <code>http://localhost:8080/api/v1</code>.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section: Authentication -->
+            <section id="authentication" class="scroll-mt-10">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Otentikasi & Keamanan (JWT)</h2>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        Sistem menggunakan <strong>JSON Web Token (JWT)</strong> dengan header <code>Authorization: Bearer &lt;TOKEN&gt;</code>.
+                    </p>
+                    <div class="bg-gray-800 text-gray-100 p-4 rounded-lg font-mono text-sm">
+                        Authorization: Bearer &lt;TOKEN_JWT_ANDA&gt;
+                    </div>
+                </div>
+            </section>
+
+            <hr class="border-gray-200">
+
+            <!-- Section 1: Auth -->
+            <section id="auth-endpoints" class="scroll-mt-10">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">1. Manajemen Akun (Authentication)</h2>
+
+                <!-- Register -->
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-md uppercase">POST</span>
+                        <code class="text-gray-700 font-semibold text-sm">/auth/register</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Mendaftarkan akun baru (role: <code>user</code> atau <code>seller</code>).</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Request Body (JSON)</p>
+                            <pre><code class="language-json">{
+  "name": "Nama Lengkap User",
+  "email": "user@ecoplan.com",
+  "password": "passworduser",
+  "role": "user"
+}</code></pre>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Response Body (201 Created)</p>
+                            <pre><code class="language-json">{
+  "success": true,
+  "message": "Registrasi akun berhasil",
+  "data": {
+    "id": "c5a6b7c8-1234-5678-90ab-cdef12345678",
+    "name": "Nama Lengkap User",
+    "email": "user@ecoplan.com",
+    "role": "user",
+    "created_at": "2026-09-13T19:00:00Z"
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Login -->
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-md uppercase">POST</span>
+                        <code class="text-gray-700 font-semibold text-sm">/auth/login</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Otentikasi kredensial pengguna dan menerbitkan JWT token.</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Request Body (JSON)</p>
+                            <pre><code class="language-json">{
+  "email": "user@ecoplan.com",
+  "password": "passworduser"
+}</code></pre>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Response Body (200 OK)</p>
+                            <pre><code class="language-json">{
+  "success": true,
+  "message": "Login berhasil",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": "c5a6b7c8-1234-5678-90ab-cdef12345678",
+      "name": "Nama Lengkap User",
+      "email": "user@ecoplan.com",
+      "role": "user"
+    }
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: AI Detection -->
+            <section id="ai-endpoints" class="scroll-mt-10">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">2. Deteksi Sampah AI (Machine Learning)</h2>
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-md uppercase">POST</span>
+                        <code class="text-gray-700 font-semibold text-sm">/detections</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Mengunggah citra sampah untuk diklasifikasikan via ResNet-50[cite: 5].</p>
+                        <code class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded block">Content-Type: multipart/form-data (key: image)</code>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Response Body (200 OK)</p>
+                            <pre><code class="language-json">{
+  "success": true,
+  "message": "Deteksi sampah berhasil",
+  "data": {
+    "detection_id": "d1e2f3a4-5678-90ab-cdef-1234567890ab",
+    "category": "plastic",
+    "confidence": 0.942,
+    "recommendation": "Bersihkan dan pisahkan ke wadah daur ulang plastik."
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 font-bold text-xs rounded-md uppercase">GET</span>
+                        <code class="text-gray-700 font-semibold text-sm">/detections/history</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Mengambil riwayat deteksi pengguna yang memerlukan token otentikasi.</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Response Body (200 OK)</p>
+                            <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    {
+      "id": "d1e2f3a4-5678-90ab-cdef-1234567890ab",
+      "category": "plastic",
+      "confidence": 0.942,
+      "image_url": "https://storage.ecoplan.com/images/sampah.jpg",
+      "created_at": "2026-09-13T19:10:00Z"
+    }
+  ]
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Gemini & Guides -->
+            <section id="gemini-endpoints" class="scroll-mt-10">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">3. Edukasi & Gemini AI</h2>
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 font-bold text-xs rounded-md uppercase">GET</span>
+                        <code class="text-gray-700 font-semibold text-sm">/guides/:category</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Mengambil panduan penanganan berdasarkan kategori sampah spesifik.</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Response Body (200 OK)</p>
+                            <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "category": "plastic",
+    "title": "Pengelolaan Sampah Plastik Rumah Tangga",
+    "steps": [
+      "Cuci bersih sisa makanan pada botol plastik.",
+      "Lepaskan label dan tutup botol.",
+      "Kumpulkan ke bank sampah terdekat."
+    ]
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-md uppercase">POST</span>
+                        <code class="text-gray-700 font-semibold text-sm">/guides/ai-suggestion</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Memicu Gemini AI untuk saran daur ulang kustom.</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Request Body (JSON)</p>
+                            <pre><code class="language-json">{
+  "category": "plastic",
+  "prompt": "Bagaimana cara membuat pot tanaman gantung dari botol plastik?"
+}</code></pre>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Response Body (200 OK)</p>
+                            <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "suggestion": "Potong bagian tengah botol plastik, buat lubang drainase di bawahnya, lalu pasang tali penggantung..."
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: Articles -->
+            <section id="article-endpoints" class="scroll-mt-10">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">4. Artikel & Publikasi (Full CRUD + Admin Review)</h2>
+
+                <!-- Create Article -->
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-md uppercase">POST</span>
+                        <code class="text-gray-700 font-semibold text-sm">/articles</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Mengirim draf artikel baru lengkap dengan skor Turnitin[cite: 5].</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Request Body (JSON)</p>
+                            <pre><code class="language-json">{
+  "title": "Strategi Pengolahan Sampah Plastik",
+  "content": "Pengolahan sampah plastik memerlukan keterlibatan aktif...",
+  "turnitin_score": 12.5
+}</code></pre>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Response Body (201 Created)</p>
+                            <pre><code class="language-json">{
+  "success": true,
+  "message": "Draf artikel berhasil dikirim",
+  "data": {
+    "id": "a1b2c3d4-0000-0000-0000-000000000000",
+    "status": "pending_review"
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Read Articles -->
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 font-bold text-xs rounded-md uppercase">GET</span>
+                        <code class="text-gray-700 font-semibold text-sm">/articles</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Menampilkan daftar artikel terpublikasi dengan parameter pencarian.</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Response Body (200 OK)</p>
+                            <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    {
+      "id": "a1b2c3d4-0000-0000-0000-000000000000",
+      "title": "Strategi Pengolahan Sampah Plastik",
+      "author": "Shinta Nursobah Chairani",
+      "status": "published"
+    }
+  ]
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Update Article -->
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-amber-100 text-amber-700 font-bold text-xs rounded-md uppercase">PUT</span>
+                        <code class="text-gray-700 font-semibold text-sm">/articles/:id</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Memperbarui draf artikel oleh penulis.</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Request Body (JSON)</p>
+                            <pre><code class="language-json">{
+  "title": "Revisi: Strategi Pengolahan Sampah Plastik",
+  "content": "Konten artikel yang telah disempurnakan..."
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Review Article -->
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-purple-100 text-purple-700 font-bold text-xs rounded-md uppercase">PATCH</span>
+                        <code class="text-gray-700 font-semibold text-sm">/articles/:id/review</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Moderasi dan persetujuan artikel oleh admin.</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Request Body (JSON)</p>
+                            <pre><code class="language-json">{
+  "status": "published",
+  "turnitin_score": 12.5
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delete Article -->
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-red-100 text-red-700 font-bold text-xs rounded-md uppercase">DELETE</span>
+                        <code class="text-gray-700 font-semibold text-sm">/articles/:id</code>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600 text-sm">Menghapus artikel dari sistem.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 5: Store & Products -->
+            <section id="store-endpoints" class="scroll-mt-10">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">5. Marketplace, Toko & Produk (Full CRUD)</h2>
+
+                <!-- Register Store -->
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-md uppercase">POST</span>
+                        <code class="text-gray-700 font-semibold text-sm">/stores</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Pendaftaran toko baru dan pengaktifan role seller.</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Request Body (JSON)</p>
+                            <pre><code class="language-json">{
+  "store_name": "Toko Daur Ulang Mandiri",
+  "store_description": "Pusat kerajinan tangan dan kompos organik.",
+  "address": "Sleman, Yogyakarta"
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create Product -->
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-md uppercase">POST</span>
+                        <code class="text-gray-700 font-semibold text-sm">/marketplace/products</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Menambahkan produk baru ke katalog toko.</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Request Body (JSON)</p>
+                            <pre><code class="language-json">{
+  "name": "Pupuk Kompos Organik 5kg",
+  "description": "Kompos murni hasil olahan sampah dapur.",
+  "price": 25000,
+  "stock": 100,
+  "category": "biological"
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Read Products -->
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 font-bold text-xs rounded-md uppercase">GET</span>
+                        <code class="text-gray-700 font-semibold text-sm">/marketplace/products</code>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600 text-sm">Menampilkan daftar seluruh produk marketplace.</p>
+                    </div>
+                </div>
+
+                <!-- Update Product -->
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-amber-100 text-amber-700 font-bold text-xs rounded-md uppercase">PUT</span>
+                        <code class="text-gray-700 font-semibold text-sm">/marketplace/products/:id</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Memperbarui informasi produk marketplace.</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Request Body (JSON)</p>
+                            <pre><code class="language-json">{
+  "name": "Pupuk Kompos Organik Super 5kg",
+  "price": 28000,
+  "stock": 85,
+  "category": "biological"
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delete Product -->
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-red-100 text-red-700 font-bold text-xs rounded-md uppercase">DELETE</span>
+                        <code class="text-gray-700 font-semibold text-sm">/marketplace/products/:id</code>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600 text-sm">Menghapus produk dari marketplace.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 6: Transactions & Escrow -->
+            <section id="transaction-endpoints" class="scroll-mt-10">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">6. Transaksi Escrow & Midtrans</h2>
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-md uppercase">POST</span>
+                        <code class="text-gray-700 font-semibold text-sm">/transactions</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Checkout pesanan dan pembuatan Snap Token Midtrans[cite: 5].</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Request Body (JSON)</p>
+                            <pre><code class="language-json">{
+  "items": [
+    {
+      "product_id": "00000000-0000-0000-0000-000000000000",
+      "quantity": 2
+    }
+  ],
+  "shipping_cost": 15000.00
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-purple-100 text-purple-700 font-bold text-xs rounded-md uppercase">POST</span>
+                        <code class="text-gray-700 font-semibold text-sm">/payment/withdraw</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Penarikan saldo toko oleh seller.</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Request Body (JSON)</p>
+                            <pre><code class="language-json">{
+  "amount": 50000.00,
+  "bank_name": "BCA",
+  "account_number": "1234567890",
+  "account_name": "Shinta Nursobah Chairani"
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 7: Logistics -->
+            <section id="logistics-endpoints" class="scroll-mt-10">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">7. Logistik & RajaOngkir</h2>
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-md uppercase">POST</span>
+                        <code class="text-gray-700 font-semibold text-sm">/logistics/shipping-cost</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Kalkulasi estimasi ongkos kirim domestik[cite: 5].</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Request Body (JSON)</p>
+                            <pre><code class="language-json">{
+  "origin": 31555,
+  "destination": 68423,
+  "weight": 1000,
+  "courier": "jne",
+  "price": "lowest"
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 8: Profile -->
+            <section id="profile-endpoints" class="scroll-mt-10">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">8. Profil & Gamifikasi</h2>
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-amber-100 text-amber-700 font-bold text-xs rounded-md uppercase">PUT</span>
+                        <code class="text-gray-700 font-semibold text-sm">/profile</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Memperbarui informasi profil pengguna.</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Request Body (JSON)</p>
+                            <pre><code class="language-json">{
+  "name": "Shinta Nursobah Chairani",
+  "email": "shinta.chairani@ecoplan.com"
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 9: Video Management -->
+            <section id="video-endpoints" class="scroll-mt-10 mb-20">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">9. Video Edukasi YouTube (Admin CRUD)</h2>
+                <div class="endpoint-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 flex items-center gap-4">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-md uppercase">POST</span>
+                        <code class="text-gray-700 font-semibold text-sm">/videos</code>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 text-sm">Menambahkan tautan video YouTube edukasi baru khusus admin[cite: 5].</p>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Request Body (JSON)</p>
+                            <pre><code class="language-json">{
+  "title": "Tutorial Praktis Pembuatan Kompos Organik",
+  "youtube_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  "description": "Panduan langkah demi langkah kompos.",
+  "category": "biological"
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Icons Init -->
+    <script>
+        lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((el) => {
+                hljs.highlightElement(el);
+            });
+        });
+    </script>
+</body>
+
+</html>

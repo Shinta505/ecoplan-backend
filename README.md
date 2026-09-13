@@ -10,25 +10,24 @@ Berikut adalah dokumentasi repositori GitHub (`README.md`) yang sangat lengkap, 
 
 ## 📖 Daftar Isi
 
-1. [Tentang Proyek](https://www.google.com/search?q=%23-tentang-proyek)
-2. [Arsitektur & Struktur Proyek](https://www.google.com/search?q=%23-arsitektur--struktur-proyek)
-3. [Fitur Utama Sistem](https://www.google.com/search?q=%23-fitur-utama-system)
-4. [Persyaratan Sistem](https://www.google.com/search?q=%23-persyaratan-sistem)
-5. [Instalasi & Menjalankan Proyek](https://www.google.com/search?q=%23-instalasi--menjalankan-proyek)
-6. [Konfigurasi Lingkungan (`.env`)](https://www.google.com/search?q=%23-konfigurasi-lingkungan-env)
-7. [Dokumentasi Endpoints API](https://www.google.com/search?q=%23-dokumentasi-endpoints-api)
-8. [Pengujian (Testing)](https://www.google.com/search?q=%23-pengujian-testing)
-9. [Lisensi](https://www.google.com/search?q=%23-lisensi)
-
+1. Tentang Proyek
+2. Arsitektur & Struktur Proyek
+3. Fitur Utama Sistem
+4. Persyaratan Sistem
+5. Instalasi & Menjalankan Proyek
+6. Konfigurasi Lingkungan (`.env`)
+7. Dokumentasi Endpoints API
+8. Pengujian (Testing)
+9. Lisensi
 ---
 
 ## 🍃 Tentang Proyek
 
-**EcoPlan** adalah platform digital berbasis web dan mobile yang mengintegrasikan kecerdasan buatan (*Artificial Intelligence*), ekonomi sirkular (*circular economy*), serta sistem e-commerce berkelanjutan. Repositori ini (`ecoplan-backend`) merupakan inti dari layanan server-side yang dibangun menggunakan bahasa **Go (Golang)** dengan *framework* **Gin**, serta didukung oleh basis data relasional **PostgreSQL / Supabase**[cite: 1, 3].
+**EcoPlan** adalah platform digital berbasis web dan mobile yang mengintegrasikan kecerdasan buatan (*Artificial Intelligence*), ekonomi sirkular (*circular economy*), serta sistem e-commerce berkelanjutan. Repositori ini (`ecoplan-backend`) merupakan inti dari layanan server-side yang dibangun menggunakan bahasa **Go (Golang)** dengan *framework* **Gin**, serta didukung oleh basis data relasional **PostgreSQL / Supabase**.
 
 Sistem backend ini dirancang untuk menangani berbagai modul krusial, antara lain:
 
-* **AI Waste Detection Integration:** Meneruskan citra sampah ke microservice AI (ResNet50 / ONNX) untuk klasifikasi otomatis ke dalam 10 kategori sampah resmi[cite: 1, 2].
+* **AI Waste Detection Integration:** Meneruskan citra sampah ke microservice AI (ResNet50 / ONNX) untuk klasifikasi otomatis ke dalam 10 kategori sampah resmi.
 * **Marketplace Daur Ulang & Kompos:** Memfasilitasi transaksi jual-beli barang daur ulang, sampah layak pakai, dan pupuk kompos.
 
 
@@ -46,7 +45,7 @@ Sistem backend ini dirancang untuk menangani berbagai modul krusial, antara lain
 
 ## 📁 Arsitektur & Struktur Proyek
 
-Struktur direktori proyek dirancang menggunakan pola arsitektur berlapis (*layered architecture*) yang bersih dan termodulisasi[cite: 3]:
+Struktur direktori proyek dirancang menggunakan pola arsitektur berlapis (*layered architecture*) yang bersih dan termodulisasi:
 
 ```text
 ecoplan-backend/
@@ -60,12 +59,12 @@ ecoplan-backend/
 │   ├── rajaongkir_service.go # Integrasi logika API RajaOngkir Komerce v1
 │   └── midtrans_service.go  # Logika bisnis pembayaran & webhook escrow
 ├── models/
-│   ├── user.go              # Entitas data pengguna & RBAC (Admin, Seller, User)[cite: 1]
-│   ├── store.go             # Entitas toko penjual (Seller)[cite: 1]
-│   ├── product.go           # Entitas produk daur ulang / kompos[cite: 1]
-│   ├── transaction.go       # Entitas transaksi escrow & *transaction items*[cite: 2]
-│   ├── detection.go         # Entitas riwayat pemindaian sampah AI[cite: 2]
-│   ├── article.go           # Entitas artikel edukasi & skor Turnitin[cite: 1]
+│   ├── user.go              # Entitas data pengguna & RBAC (Admin, Seller, User)
+│   ├── store.go             # Entitas toko penjual (Seller)
+│   ├── product.go           # Entitas produk daur ulang / kompos
+│   ├── transaction.go       # Entitas transaksi escrow & *transaction items*
+│   ├── detection.go         # Entitas riwayat pemindaian sampah AI
+│   ├── article.go           # Entitas artikel edukasi & skor Turnitin
 │   └── video.go             # Entitas video edukasi YouTube
 ├── controllers/
 │   ├── auth_controller.go   # Logika registrasi, login, & hashing bcrypt
@@ -89,7 +88,7 @@ ecoplan-backend/
 ├── .env                     # Berkas konfigurasi lokal (ignore)
 ├── .env.example             # Template konfigurasi environment
 ├── .gitignore               # Aturan pengecualian Git
-├── go.mod                   # Manajemen dependencies Go[cite: 1]
+├── go.mod                   # Manajemen dependencies Go
 └── go.sum                   # Checksum dependencies
 
 ```
@@ -106,7 +105,7 @@ ecoplan-backend/
 
 
 2. **Klasifikasi Sampah Cerdas (AI-Powered):**
-* Mengunggah gambar sampah untuk dideteksi secara otomatis menggunakan model berbasis *ResNet50 ONNX*[cite: 1, 2].
+* Mengunggah gambar sampah untuk dideteksi secara otomatis menggunakan model berbasis *ResNet50 ONNX*.
 * Memberikan hadiah *Eco-Points* otomatis kepada pengguna yang aktif melakukan pemindaian.
 
 
@@ -208,7 +207,7 @@ RAJAONGKIR_API_KEY=your_rajaongkir_api_key
 
 ## 📌 Dokumentasi Endpoints API
 
-Seluruh endpoint dikelompokkan di bawah prefix `/api/v1`[cite: 3]. Anda dapat menggunakan berkas `api.http` di dalam proyek bersama ekstensi *REST Client* (VS Code) untuk pengujian cepat.
+Seluruh endpoint dikelompokkan di bawah prefix `/api/v1`. Anda dapat menggunakan berkas `api.http` di dalam proyek bersama ekstensi *REST Client* (VS Code) untuk pengujian cepat.
 
 ### 1. Autentikasi (`/api/v1/auth`)
 

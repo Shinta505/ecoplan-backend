@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"net/http"
+
 	"ecoplan-backend/controllers"
 	"ecoplan-backend/middleware"
 	"ecoplan-backend/models"
@@ -15,6 +17,21 @@ func SetupRouter() *gin.Engine {
 
 	// Global Middleware (opsional jika dibutuhkan, seperti CORS)
 	// r.Use(CORSMiddleware())
+
+	// ==========================================
+	// 0. API DOCUMENTATION ROUTE
+	// ==========================================
+	// Memuat seluruh templat antarmuka HTML dari direktori 'views'
+	r.LoadHTMLGlob("views/*")
+
+	// Menyajikan halaman dokumentasi API pada endpoint root (/) dan (/api/docs)
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "documentation.html", nil)
+	})
+
+	r.GET("/api/docs", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "documentation.html", nil)
+	})
 
 	// API Versioning Group (/api/v1)
 	v1 := r.Group("/api/v1")
