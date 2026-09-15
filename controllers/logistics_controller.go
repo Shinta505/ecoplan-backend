@@ -37,22 +37,28 @@ type CalculateShippingCostInput struct {
 //
 // HTTP Endpoint : GET /api/v1/logistics/destinations
 // Hak Akses     : Publik / Authenticated User
+// SearchDestination mengeksekusi pencarian lokasi wilayah domestik
 func (lc *LogisticsController) SearchDestination(c *gin.Context) {
 	search := c.Query("search")
 	limitStr := c.Query("limit")
 
-	limit := 10
+	limit := 100
 	if limitStr != "" {
 		if l, err := strconv.Atoi(limitStr); err == nil {
 			limit = l
 		}
 	}
 
-	rajaOngkirSvc := services.NewRajaOngkirService()
-	result, err := rajaOngkirSvc.SearchDomesticDestination(search, limit, 0)
+	// Gunakan pengecekan manual untuk memastikan service terinisialisasi
+	svc := services.NewRajaOngkirService()
+	if svc == nil {
+		c.String(http.StatusInternalServerError, "FATAL: Gagal menginisialisasi RajaOngkirService")
+		return
+	}
+
+	result, err := svc.SearchDomesticDestination(search, limit, 0)
 	if err != nil {
-		// CETAK ERROR MENTAH KE POSTMAN SEBAGAI STRING BIASA
-		c.String(http.StatusInternalServerError, "ERROR ASLI DARI BACKEND: %s", err.Error())
+		c.String(http.StatusInternalServerError, "ERROR DARI RAJAONGKIR SERVICE: %s", err.Error())
 		return
 	}
 
