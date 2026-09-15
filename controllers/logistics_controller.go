@@ -38,42 +38,27 @@ type CalculateShippingCostInput struct {
 // HTTP Endpoint : GET /api/v1/logistics/destinations
 // Hak Akses     : Publik / Authenticated User
 func (lc *LogisticsController) SearchDestination(c *gin.Context) {
-	searchQuery := c.Query("search")
-	if strings.TrimSpace(searchQuery) == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Parameter kata kunci pencarian ('search') wajib diisi.",
-		})
-		return
+	search := c.Query("search")
+	limitStr := c.Query("limit")
+
+	limit := 10
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil {
+			limit = l
+		}
 	}
 
-	limitStr := c.DefaultQuery("limit", "10")
-	offsetStr := c.DefaultQuery("offset", "0")
-
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil || limit <= 0 {
-		limit = 10
-	}
-
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil || offset < 0 {
-		offset = 0
-	}
-
-	result, err := lc.rajaOngkirService.SearchDomesticDestination(searchQuery, limit, offset)
+	rajaOngkirSvc := services.NewRajaOngkirService()
+	result, err := rajaOngkirSvc.SearchDomesticDestination(search, limit, 0)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "Gagal melakukan pencarian wilayah pengiriman melalui API RajaOngkir.",
-			"error":   err.Error(),
-		})
+		// CETAK ERROR MENTAH KE POSTMAN SEBAGAI STRING BIASA
+		c.String(http.StatusInternalServerError, "ERROR ASLI DARI BACKEND: %s", err.Error())
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Berhasil memperoleh data wilayah pengiriman domestik.",
-		"data":    result.Data,
+		"data":    result,
 	})
 }
 
