@@ -1,7 +1,3 @@
-Berikut adalah dokumentasi repositori GitHub (`README.md`) yang sangat lengkap, profesional, dan terstruktur untuk proyek **EcoPlan Backend**, disesuaikan dengan standar penulisan skripsi S1 Informatika serta menggunakan **Lisensi MIT**.
-
----
-
 # 🌿 EcoPlan Backend API
 
 **Backend Service untuk Platform Pengelolaan Sampah Berbasis Ekonomi Sirkular, Klasifikasi Citra AI, dan Rekening Bersama (Escrow)**

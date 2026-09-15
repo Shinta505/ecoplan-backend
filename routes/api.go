@@ -211,6 +211,14 @@ func SetupRouter() *gin.Engine {
 				adminVideos.DELETE("/:id", controllers.DeleteVideo)
 			}
 		}
+
+		// ==========================================
+		// 10. SYSTEM STATISTICAL SUMMARY ROUTE
+		// ==========================================
+		statsGroup := v1.Group("/stats")
+		{
+			statsGroup.GET("/summary", controllers.GetStatsSummary)
+		}
 	}
 
 	return r

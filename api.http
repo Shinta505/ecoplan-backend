@@ -392,3 +392,10 @@ Content-Type: application/json
 ### Hapus Data Video Edukasi (Khusus Admin)
 DELETE {{baseUrl}}/videos/00000000-0000-0000-0000-000000000000
 Authorization: Bearer {{adminToken}}
+
+### ==========================================
+### 10. SYSTEM STATISTICAL SUMMARY
+### ==========================================
+
+### Ambil Ringkasan Statistik Terpusat Sistem (Publik)
+GET {{baseUrl}}/stats/summary
