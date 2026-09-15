@@ -122,13 +122,14 @@ func (s *RajaOngkirService) SearchDomesticDestination(search string, limit, offs
 		return nil, fmt.Errorf("gagal membaca respons API RajaOngkir: %w", err)
 	}
 
-	var result DomesticDestinationResponse
-	if err := json.Unmarshal(bodyBytes, &result); err != nil {
-		return nil, fmt.Errorf("gagal parsing JSON respons pencarian lokasi: %w", err)
+	// Cek status code dulu sebelum unmarshal agar aman dari error 500/400
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API RajaOngkir mengembalikan status error (%d): %s", resp.StatusCode, string(bodyBytes))
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API RajaOngkir mengembalikan status error (%d): %s", resp.StatusCode, result.Meta.Message)
+	var result DomesticDestinationResponse
+	if err := json.Unmarshal(bodyBytes, &result); err != nil {
+		return nil, fmt.Errorf("gagal parsing JSON respons pencarian lokasi: %w (Body: %s)", err, string(bodyBytes))
 	}
 
 	return &result, nil
