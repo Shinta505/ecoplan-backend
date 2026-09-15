@@ -19,9 +19,9 @@ const BaseURLRajaOngkir = "https://rajaongkir.komerce.id/api/v1"
 
 // MetaResponse mendefinisikan struktur metadata respons API RajaOngkir.
 type MetaResponse struct {
-	Message string `json:"message"`
-	Code    int    `json:"code"`
-	Status  string `json:"status"`
+	Message string      `json:"message"`
+	Code    int         `json:"code"`
+	Status  interface{} `json:"status"`
 }
 
 // DomesticDestination mendefinisikan entitas data lokasi pengiriman domestik di Indonesia.
