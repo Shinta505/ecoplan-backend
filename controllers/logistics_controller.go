@@ -42,7 +42,7 @@ func (lc *LogisticsController) SearchDestination(c *gin.Context) {
 	search := c.Query("search")
 	limitStr := c.Query("limit")
 
-	limit := 100
+	limit := 5
 	if limitStr != "" {
 		if l, err := strconv.Atoi(limitStr); err == nil {
 			limit = l
