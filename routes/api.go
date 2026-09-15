@@ -51,7 +51,7 @@ func SetupRouter() *gin.Engine {
 		detectionGroup := v1.Group("/detections")
 		{
 			// Publik (Guest) maupun Terautentikasi dapat melakukan deteksi sampah
-			detectionGroup.POST("", controllers.DetectWaste)
+			detectionGroup.POST("", middleware.OptionalAuthMiddleware(), controllers.DetectWaste)
 			detectionGroup.GET("/:id", controllers.GetDetectionByID)
 
 			// Endpoint terproteksi khusus riwayat deteksi pengguna login

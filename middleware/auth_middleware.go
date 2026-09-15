@@ -84,6 +84,32 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
+func OptionalAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.Next()
+			return
+		}
+
+		parts := strings.SplitN(authHeader, " ", 2)
+		if len(parts) == 2 && parts[0] == "Bearer" {
+			claims := &JWTClaims{}
+			token, err := jwt.ParseWithClaims(parts[1], claims, func(token *jwt.Token) (interface{}, error) {
+				return []byte(config.ENV.JWTSecret), nil
+			})
+			if err == nil && token.Valid {
+				if userUUID, err := uuid.Parse(claims.UserID); err == nil {
+					c.Set("user_id", userUUID)
+					c.Set("user_email", claims.Email)
+					c.Set("user_role", claims.Role)
+				}
+			}
+		}
+		c.Next()
+	}
+}
+
 // RequireRoles memvalidasi otorisasi peran pengguna (Role-Based Access Control / RBAC)
 // untuk memastikan pengguna memiliki hak akses yang diperbolehkan.
 func RequireRoles(allowedRoles ...models.UserRole) gin.HandlerFunc {
