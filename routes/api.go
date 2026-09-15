@@ -16,7 +16,7 @@ func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
 	// Global Middleware (opsional jika dibutuhkan, seperti CORS)
-	// r.Use(CORSMiddleware())
+	r.Use(middleware.CORSMiddleware())
 
 	// ==========================================
 	// 0. API DOCUMENTATION ROUTE
