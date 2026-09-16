@@ -429,7 +429,7 @@ func (gc *GuideController) AskGemini(c *gin.Context) {
 			"Petunjuk Jawaban:\n"+
 			"1. Berikan penjelasan yang edukatif, praktis, ramah lingkungan, dan aman.\n"+
 			"2. Fokus pada metode daur ulang, kreasi produk upcycling, atau langkah penanganan yang benar.\n"+
-			"3. Gunakan bahasa Indonesia yang sopan, terstruktur, serta mudah dipahami.",
+			"3. Gunakan bahasa Indonesia yang terstruktur, mudah dipahami, serta gaya bahasanya santai seperti ngobrol dengan teman.",
 		categoryLower, req.Prompt,
 	)
 
