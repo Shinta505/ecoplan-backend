@@ -26,6 +26,7 @@ type CheckoutItemInput struct {
 type CreateTransactionInput struct {
 	Items        []CheckoutItemInput `json:"items" binding:"required,dive"`
 	ShippingCost float64             `json:"shipping_cost" binding:"gte=0"`
+	VoucherCode  string              `json:"voucher_code,omitempty"`
 }
 
 // UpdateTransactionStatusInput mendefinisikan DTO untuk mengubah status alur transaksi escrow.
@@ -165,7 +166,25 @@ func CreateTransaction(c *gin.Context) {
 		transactionItems = append(transactionItems, txItem)
 	}
 
-	totalAmount := subtotal + input.ShippingCost
+	var discountAmount float64 = 0.0
+	if input.VoucherCode != "" {
+		var voucher models.DiscountVoucher
+		// Cari voucher berdasarkan kode dan pastikan milik user yang login serta belum dipakai
+		if err := dbTx.Where("code = ? AND user_id = ? AND is_used = ?", input.VoucherCode, buyerID, false).First(&voucher).Error; err == nil {
+			// Cek masa kedaluwarsa
+			if time.Now().Before(voucher.ExpiresAt) {
+				discountAmount = voucher.DiscountAmount
+				// Tandai voucher sudah digunakan
+				voucher.IsUsed = true
+				dbTx.Save(&voucher)
+			}
+		}
+	}
+
+	totalAmount := subtotal + input.ShippingCost - discountAmount
+	if totalAmount < 0 {
+		totalAmount = 0
+	}
 	midtransOrderID := fmt.Sprintf("ECO-%d-%s", time.Now().Unix(), buyerID.String()[:8])
 
 	// 6. Menyimpan entitas transaksi utama pada tabel transactions
@@ -173,6 +192,8 @@ func CreateTransaction(c *gin.Context) {
 		BuyerID:         buyerID,
 		TotalAmount:     totalAmount,
 		ShippingCost:    input.ShippingCost,
+		DiscountAmount:  discountAmount,
+		VoucherCode:     input.VoucherCode,
 		Status:          models.StatusPendingPayment,
 		MidtransOrderID: midtransOrderID,
 		Items:           transactionItems,

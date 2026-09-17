@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"ecoplan-backend/config"
 	"ecoplan-backend/models"
@@ -225,6 +227,141 @@ func WithdrawSellerBalance(c *gin.Context) {
 				"account_number": input.AccountNumber,
 				"account_name":   input.AccountName,
 			},
+		},
+	})
+}
+
+// RedeemEcoPointsVoucher memfasilitasi penukaran (redeem) eco_points pengguna
+// menjadi kode voucher diskon belanja marketplace EcoPlan berdasarkan rasio konversi tertentu.
+//
+// HTTP Endpoint : POST /api/v1/profile/redeem-voucher (atau /api/v1/rewards/redeem)
+// Hak Akses     : Authenticated User (Bearer JWT)
+func RedeemEcoPointsVoucher(c *gin.Context) {
+	type RedeemInput struct {
+		PointsSpent    int `json:"points_spent"`
+		PointsToRedeem int `json:"points_to_redeem"`
+	}
+
+	// 1. Membaca identitas pengguna dari konteks JWT Middleware
+	userIDVal, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "Akses ditolak. Sesi otentikasi pengguna tidak ditemukan.",
+		})
+		return
+	}
+
+	userID := userIDVal.(uuid.UUID)
+
+	// 2. Parsing dan validasi payload HTTP Request Body
+	var input RedeemInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Format data penukaran poin tidak valid.",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Fleksibilitas penerimaan parameter masukan (points_spent atau points_to_redeem)
+	pointsToDeduct := input.PointsSpent
+	if pointsToDeduct <= 0 {
+		pointsToDeduct = input.PointsToRedeem
+	}
+
+	if pointsToDeduct <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Jumlah poin yang ditukarkan harus lebih besar dari 0.",
+		})
+		return
+	}
+
+	// 3. Menginisialisasi Transaksi Basis Data (DB Transaction) untuk menjamin integritas data
+	dbTx := config.DB.Begin()
+
+	var user models.User
+	if err := dbTx.Where("id = ?", userID).First(&user).Error; err != nil {
+		dbTx.Rollback()
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Data akun pengguna tidak ditemukan.",
+		})
+		return
+	}
+
+	// 4. Verifikasi kecukupan akumulasi eco_points pengguna
+	if user.EcoPoints < pointsToDeduct {
+		dbTx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Akumulasi EcoPoints Anda tidak mencukupi untuk melakukan penukaran ini.",
+			"data": gin.H{
+				"current_eco_points": user.EcoPoints,
+				"requested_points":   pointsToDeduct,
+			},
+		})
+		return
+	}
+
+	// 5. Kalkulasi rasio konversi poin ke nominal rupiah (Rasio: 1 EcoPoint = Rp 100,-)
+	const conversionRatio = 100.0
+	discountAmount := float64(pointsToDeduct) * conversionRatio
+
+	// Menghasilkan kode unik voucher diskon (Format: ECO-VCH-<TIMESTAMP>-<HASH>)
+	randomHash := strings.ToUpper(uuid.New().String()[:8])
+	voucherCode := fmt.Sprintf("ECO-VCH-%d-%s", time.Now().Unix(), randomHash)
+
+	// 6. Pengurangan nilai eco_points akun pengguna
+	user.EcoPoints -= pointsToDeduct
+	if err := dbTx.Save(&user).Error; err != nil {
+		dbTx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal memperbarui saldo EcoPoints pengguna.",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// 7. Instansiasi dan pencatatan entitas DiscountVoucher baru (Masa berlaku voucher: 30 Hari)
+	voucher := models.DiscountVoucher{
+		UserID:         user.ID,
+		Code:           voucherCode,
+		DiscountAmount: discountAmount,
+		PointsSpent:    pointsToDeduct,
+		IsUsed:         false,
+		ExpiresAt:      time.Now().AddDate(0, 0, 30),
+	}
+
+	if err := dbTx.Create(&voucher).Error; err != nil {
+		dbTx.Rollback()
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal menerbitkan entitas voucher diskon baru ke basis data.",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Commit transaksi basis data
+	if err := dbTx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Gagal menyelesaikan komit transaksi penukaran poin.",
+		})
+		return
+	}
+
+	// 8. Mengembalikan respons HTTP 201 Created beserta rincian voucher
+	c.JSON(http.StatusCreated, gin.H{
+		"success": true,
+		"message": "Penukaran EcoPoints menjadi voucher diskon belanja berhasil diproses.",
+		"data": gin.H{
+			"voucher":              voucher,
+			"remaining_eco_points": user.EcoPoints,
 		},
 	})
 }

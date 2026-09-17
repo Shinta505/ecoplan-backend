@@ -20,6 +20,7 @@ func main() {
 	// 3. Menjalankan Auto-Migrate untuk memastikan seluruh tabel model terbuat secara otomatis di basis data
 	err := db.AutoMigrate(
 		&models.User{},
+		&models.DiscountVoucher{},
 		&models.Store{},
 		&models.Product{},
 		&models.Transaction{},

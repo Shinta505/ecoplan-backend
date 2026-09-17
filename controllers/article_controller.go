@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"ecoplan-backend/config"
 	"ecoplan-backend/models"
@@ -192,13 +193,16 @@ func GetAllArticles(c *gin.Context) {
 }
 
 // GetArticleByID mengambil rincian detail artikel berdasarkan UUID Identifier
-// sekaligus mencatat penambahan jumlah pembaca (ViewsCount) untuk mendukung perhitungan reward/monetisasi.
+// sekaligus mencatat penambahan jumlah pembaca (ViewsCount) & reward Eco-Points kelipatan 10.
 //
 // HTTP Endpoint : GET /api/v1/articles/:id
 // Hak Akses     : Publik / Authenticated User
 func GetArticleByID(c *gin.Context) {
 	articleIDStr := c.Param("id")
-	articleID, err := uuid.Parse(articleIDStr)
+	clientIP := c.ClientIP()
+
+	// 1. Validasi format UUID artikel
+	parsedArticleID, err := uuid.Parse(articleIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -207,41 +211,62 @@ func GetArticleByID(c *gin.Context) {
 		return
 	}
 
-	// 1. Membaca entitas artikel dari basis data
+	// 2. Cek apakah IP ini sudah melihat artikel ini dalam 24 jam terakhir
+	var existingView models.ArticleView
+	err = config.DB.Where("article_id = ? AND ip_address = ? AND created_at >= ?",
+		parsedArticleID, clientIP, time.Now().Add(-24*time.Hour)).First(&existingView).Error
+
+	// 3. Jika belum ada, catat view baru dan increment views_count secara aman
+	if err != nil {
+		tx := config.DB.Begin()
+
+		newView := models.ArticleView{
+			ArticleID: parsedArticleID,
+			IPAddress: clientIP,
+		}
+
+		if err := tx.Create(&newView).Error; err == nil {
+			// Increment views_count pada artikel
+			tx.Model(&models.Article{}).Where("id = ?", parsedArticleID).
+				UpdateColumn("views_count", gorm.Expr("views_count + ?", 1))
+
+			// Ambil data artikel terbaru untuk mengecek total views_count saat ini
+			var tempArticle models.Article
+			if err := tx.Where("id = ?", parsedArticleID).First(&tempArticle).Error; err == nil {
+				// Jika views_count kelipatan 10, berikan bonus +7 Eco-Points ke Author
+				if tempArticle.ViewsCount > 0 && tempArticle.ViewsCount%10 == 0 {
+					tx.Model(&models.User{}).Where("id = ?", tempArticle.AuthorID).
+						UpdateColumn("eco_points", gorm.Expr("eco_points + ?", 7))
+				}
+			}
+
+			tx.Commit()
+		} else {
+			tx.Rollback()
+		}
+	}
+
+	// 4. Ambil data artikel beserta relasi Author menggunakan parsedArticleID (UUID)
 	var article models.Article
-	if err := config.DB.Preload("Author").Where("id = ?", articleID).First(&article).Error; err != nil {
+	if err := config.DB.Preload("Author").Where("id = ?", parsedArticleID).First(&article).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"success": false,
-				"message": "Artikel edukasi tidak ditemukan.",
+				"message": "Artikel tidak ditemukan.",
 			})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"message": "Terjadi kesalahan saat membaca data artikel dari basis data.",
+			"message": "Gagal mengambil data artikel.",
 			"error":   err.Error(),
 		})
 		return
 	}
 
-	// 2. Meningkatkan akumulasi pembaca (ViewsCount) secara atomik jika artikel telah terpublikasi
-	if article.Status == models.ArticleStatusPublished {
-		config.DB.Model(&article).UpdateColumn("views_count", gorm.Expr("views_count + ?", 1))
-		article.ViewsCount++
-
-		// Menambahkan Eco-Points kepada Penulis setiap kelipatan 50 views (Sistem Monetisasi & Reward)
-		if article.ViewsCount%50 == 0 {
-			config.DB.Model(&models.User{}).
-				Where("id = ?", article.AuthorID).
-				UpdateColumn("eco_points", gorm.Expr("eco_points + ?", 20))
-		}
-	}
-
-	// 3. Mengembalikan respons detail artikel
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Berhasil mengambil rincian detail artikel.",
+		"message": "Berhasil mengambil rincian artikel.",
 		"data":    article,
 	})
 }
@@ -323,11 +348,11 @@ func ReviewArticle(c *gin.Context) {
 		return
 	}
 
-	// 5. Pemberian hadiah Eco-Points kepada penulis jika artikel disetujui publikasi untuk pertama kali
+	// 5. Pemberian hadiah Eco-Points awal kepada penulis (300 poin) jika artikel disetujui publikasi untuk pertama kali
 	if previousStatus != models.ArticleStatusPublished && article.Status == models.ArticleStatusPublished {
 		config.DB.Model(&models.User{}).
 			Where("id = ?", article.AuthorID).
-			UpdateColumn("eco_points", gorm.Expr("eco_points + ?", 50))
+			UpdateColumn("eco_points", gorm.Expr("eco_points + ?", 300))
 	}
 
 	// 6. Preload data Penulis untuk menyajikan respons hasil moderasi

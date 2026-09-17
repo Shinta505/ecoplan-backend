@@ -105,7 +105,7 @@ func SetupRouter() *gin.Engine {
 		// ==========================================
 		storeGroup := v1.Group("/stores")
 		{
-			// Publik dapat melihat detail toko
+			// Terproteksi Middleware untuk pembuatan dan manajemen toko pengguna
 			storeGroup.Use(middleware.AuthMiddleware())
 			{
 				storeGroup.POST("", controllers.CreateStore)
@@ -190,6 +190,15 @@ func SetupRouter() *gin.Engine {
 				profileGroup.PUT("", controllers.UpdateProfile)
 				profileGroup.GET("/transactions", controllers.GetProfileTransactions)
 				profileGroup.GET("/detections", controllers.GetDetectionHistory)
+				profileGroup.POST("/redeem-voucher", controllers.RedeemEcoPointsVoucher)
+			}
+		}
+
+		rewardsGroup := v1.Group("/rewards")
+		{
+			rewardsGroup.Use(middleware.AuthMiddleware())
+			{
+				rewardsGroup.POST("/redeem", controllers.RedeemEcoPointsVoucher)
 			}
 		}
 

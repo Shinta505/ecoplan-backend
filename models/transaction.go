@@ -27,6 +27,8 @@ type Transaction struct {
 	Buyer           *User             `gorm:"foreignKey:BuyerID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;" json:"buyer,omitempty"`
 	TotalAmount     float64           `gorm:"type:numeric(15,2);not null;default:0.00" json:"total_amount"`
 	ShippingCost    float64           `gorm:"type:numeric(15,2);not null;default:0.00" json:"shipping_cost"`
+	DiscountAmount  float64           `gorm:"type:numeric(15,2);not null;default:0.00" json:"discount_amount"`
+	VoucherCode     string            `gorm:"type:varchar(50)" json:"voucher_code,omitempty"`
 	Status          TransactionStatus `gorm:"type:varchar(50);default:'pending_payment';not null" json:"status"`
 	ReceiptNumber   string            `gorm:"type:varchar(100)" json:"receipt_number"`
 	MidtransOrderID string            `gorm:"type:varchar(255);uniqueIndex;not null" json:"midtrans_order_id"`

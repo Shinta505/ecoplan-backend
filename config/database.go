@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"ecoplan-backend/models"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -29,6 +31,14 @@ func ConnectDatabase() *gorm.DB {
 	}
 
 	log.Println("[INFO] Berhasil terhubung ke basis data PostgreSQL/Supabase.")
+
+	// Eksekusi AutoMigrate untuk mendaftarkan struktur tabel secara otomatis
+	err = database.AutoMigrate(&models.User{}, &models.Article{}, &models.ArticleView{})
+	if err != nil {
+		log.Fatalf("[ERROR] Gagal melakukan migrasi basis data: %v", err)
+	}
+	log.Println("[INFO] Migrasi skema basis data berhasil dijalankan.")
+
 	DB = database
 	return DB
 }
